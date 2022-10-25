@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking.Match;
+using UnityEngine.UIElements;
 using static UnityEngine.GraphicsBuffer;
 
 //PLEASE READ
@@ -12,79 +15,71 @@ public class Actor : MonoBehaviour
 
     //basic stats
     public double maxHP = 100;
-    public double HP;
+    protected double HP;
     public float moveSpeed = 1;
 
     //attack stats
     public double attackDamage = 10;
     public float attackSpeed = 1;
     public double attackRange = 1;
-    public float next_attack_time; //to control attack speed
+    protected float next_attack_time; //to control attack speed
 
     //defense stats
     public double armorPoint = 1;
     public string attackType = "physical";
     public string armorType = "steel";
 
-    [System.NonSerialized] protected GameObject target = null; //this actor will follow and attack this target
+    //privated stats that be hardcode
+    private float viewRange = 3;
 
     public void Start()
     {
         //animation prepare
+        //scale attack speed animation with attack speed
         animator = GetComponent<Animator>();
-        animator.SetFloat("AttackFreq", 0.3f / 1 * attackSpeed);
-        animator.SetBool("IsAttacking", false);
-        animator.SetBool("IsWalking", false);
-        animator.SetBool("IsDead", false);
-
+        animator.SetFloat("AttackFreq", 0.3f / 1 * attackSpeed); 
 
         HP = maxHP;
         next_attack_time = Time.time + 1 / this.attackSpeed;
-        next_reset_target_time = Time.time;
     }
 
-    // Update is called once per frame
-    void Update()
+    protected GameObject find_target_in_range(string targetTag)
     {
-        AutoAttack();
+        //look for in-range GameObject that contained in Singleton List
+        List<GameObject> targetList = null;
 
-        //set the target to null if this actor is not attacking
-        if (next_reset_target_time < Time.time && animator.GetBool("IsAttacking")==false)
-        {
-            resetTarget();
-            next_reset_target_time = Time.time + delay_reset_target_time;
-        }
-    }
+        if (targetTag == "Topper")
+            targetList = GameEnvironment.Singleton.Toppers;
+        else if (targetTag == "Botter")
+            targetList = GameEnvironment.Singleton.Botters;
+        
+        if (targetList.Count == 0)
+            return null; //there is no actor to look for
 
-    public virtual void AutoAttack()
-    {
-        if (target != null)
+        float min_distance = Vector3.Distance(this.transform.position, targetList[0].transform.position);
+        GameObject closest_topper = null;
+        //this loop look for the closest one
+        foreach (GameObject actor in targetList)
         {
-            if (target_is_in_range())
+            //calculate the distance between this actor and that topper. Take the min one
+            float distance = Vector3.Distance(this.transform.position, actor.transform.position);
+            if (distance <= min_distance)
             {
-                attack();
-                animator.SetBool("IsAttacking", true);
-                animator.SetBool("IsWalking", false);
+                closest_topper = actor;
+                min_distance = distance;
             }
-            else
-            {
-                move_to_target();
-                animator.SetBool("IsAttacking", false);
-                animator.SetBool("IsWalking", true);
-            }
-            //animator.SetBool("IsAttacking", false);
         }
-        else
-        {
-            animator.SetBool("IsAttacking", false);
-            animator.SetBool("IsWalking", false);
 
-        }
+        //only set target if it is in range. Like they only aim someone of it's in their viewRange. pretty nature ;33
+        if (min_distance <= viewRange)
+            return closest_topper;
+        else return null;
     }
 
     //attack target aka call target's TakeDamage() function
-    public virtual void attack() //attack target
+    protected virtual void attack(GameObject target) //attack target
     {
+
         if (next_attack_time <= Time.time)
         {
             target.GetComponent<Actor>().TakeDamage(this.attackDamage, this.attackType, this.gameObject);
@@ -107,54 +102,33 @@ public class Actor : MonoBehaviour
         damage = damage - (this.armorPoint * 0.06) / (1 + this.armorPoint * 0.06) * damage;
 
         this.HP = this.HP - damage;
-
-        if (this.HP <= 0)
-        {
-            Destroy(this.gameObject,1);
-            animator.SetBool("IsAttacking", false);
-            animator.SetBool("IsWalking", false);
-            animator.SetBool("IsDead", true);
-            attacker.GetComponent<Actor>().resetTarget();
-        }
     }
 
-    //reset target (to avoid this actor do everything to attack another one)
-    private float delay_reset_target_time = 0.1f;
-    private float next_reset_target_time;
-    public void resetTarget() //its public to allow others actor set target to null when they get destroyed
+    protected bool isDead()
     {
-        target = null;
+        if (this.HP < 0)
+            return true;
+        return false;
     }
 
-    //look for target
-    public void OnTriggerStay2D(Collider2D collision)
-    {
-        if (target == null && collision.tag != this.tag && collision.tag!= "Wall")
-        {
-            target = collision.gameObject;
-        }
-    }
+    //protected virtual void dead() //both toppers and botters can be dead, but their dead is different to the others
+    //{
+
+    //}
+
 
     //check if target is in attack range
-    protected bool target_is_in_range()
+    protected bool target_is_in_attack_range(GameObject target)
     {
         //if (target == null)
 
-        float target_x = target.transform.position.x;
-        float target_y = target.transform.position.y;
-        float this_x = this.transform.position.x;
-        float this_y = this.transform.position.y;
-
-        float aim_x = target_x - this_x;
-        float aim_y = target_y - this_y;
-
-        if (aim_x * aim_x + aim_y * aim_y <= attackRange * attackRange)
+        if (Vector3.Distance(this.transform.position, target.transform.position) <= attackRange)
             return true;
         return false;
     }
 
     //just move to the target, nothing more
-    protected void move_to_target()
+    protected void move_to(GameObject target)
     {
         float target_x = target.transform.position.x;
         float target_y = target.transform.position.y;
@@ -169,4 +143,8 @@ public class Actor : MonoBehaviour
         aim.Normalize();
         this.transform.Translate(aim * this.moveSpeed * Time.deltaTime);
     }
+
+
+
+
 }

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngineInternal;
 
-public class Witch : Actor
+public class Witch : Botter
 {
     public GameObject SpellBullet;
-    public override void attack()
+    protected override void attack(GameObject target)
     {
         if (next_attack_time <= Time.time)
         { 

@@ -4,30 +4,41 @@ using UnityEngine;
 
 public class Topper : Actor
 {
-    override public void AutoAttack()
+
+    protected virtual void Update() //virtual because i want to override it sometime to make some specific botter/topper
     {
-        if (target != null)
-        {
-            if (target_is_in_range())
-            {
-                attack();
-                animator.SetBool("IsAttacking", true);
-                animator.SetBool("IsWalking", false);
-            }
-            else
-            {
-                move_to_target();
-                animator.SetBool("IsAttacking", false);
-                animator.SetBool("IsWalking", true);
-            }
-            //animator.SetBool("IsAttacking", false);
-        }
+        GameObject target = find_target_in_range("Botter");
+
+        if (target == null)     //no target in range
+            to_the_South();                             //move down
         else
         {
-            this.transform.Translate(new Vector3(0, -1, 0) * moveSpeed * Time.deltaTime);
-            animator.SetBool("IsAttacking", false);
-            animator.SetBool("IsWalking", true);
-        }
-
+            if (target_is_in_attack_range(target))
+                attack(target);
+            else move_to(target);
+        }     
     }
+
+    private void LateUpdate()
+    {
+        if (isDead())
+            dead();
+    }
+
+    private void to_the_South() //GameObject go down yo yo
+    {
+
+        this.transform.Translate(Vector3.down * moveSpeed * Time.deltaTime);
+    }
+
+    protected void dead()
+    {
+        GameEnvironment.Singleton.RemoveTopper(this.gameObject);
+        //add money to balance
+        //money += x
+        //Dead Animation (in couratine)
+
+        Destroy(this.gameObject);
+    }
+
 }
