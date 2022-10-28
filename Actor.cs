@@ -15,12 +15,12 @@ public class Actor : MonoBehaviour
 
     //basic stats
     public double maxHP = 100;
-    protected double HP;
+    [SerializeField] protected double HP;
     public float moveSpeed = 1;
 
     //attack stats
-    public double attackDamage = 10;
-    public float attackSpeed = 1;
+    public double attackDamage = 10f;
+    public float attackSpeed = 1f;
     public double attackRange = 1;
     protected float next_attack_time; //to control attack speed
 
@@ -32,12 +32,12 @@ public class Actor : MonoBehaviour
     //privated stats that be hardcode
     private float viewRange = 3;
 
-    public void Start()
+    protected void Start()
     {
         //animation prepare
         //scale attack speed animation with attack speed
         animator = GetComponent<Animator>();
-        animator.SetFloat("AttackFreq", 0.3f / 1 * attackSpeed); 
+        animator.SetFloat("AttackFreq", (float)attackSpeed / 3f); 
 
         HP = maxHP;
         next_attack_time = Time.time + 1 / this.attackSpeed;
@@ -144,7 +144,20 @@ public class Actor : MonoBehaviour
         this.transform.Translate(aim * this.moveSpeed * Time.deltaTime);
     }
 
+    protected enum State: int
+    {
+        Idle, //0
+        Walking, //1
+        Attack, //2
+        Dead, //3
+       
+    }
 
+    protected void play_animation(State state)
+    {
+        int integer_state = (int) state;
 
+        animator.SetInteger("State", integer_state);
+    }
 
 }

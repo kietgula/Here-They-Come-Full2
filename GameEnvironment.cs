@@ -1,16 +1,46 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public sealed class GameEnvironment
 {
     private static GameEnvironment instance;
+
+    //private 
+
+    //Toppers
     private List<GameObject> toppers = new List<GameObject>();
-    private List<GameObject> botters = new List<GameObject>();
-    private List<GameObject> deadBotters = new List<GameObject> ();
     public List<GameObject> Toppers { get { return toppers; } }
+
+
+    //Botters
+
+    private List<GameObject> botters = new List<GameObject>();
     public List<GameObject> Botters { get { return botters; } }
+
+    //Dead Botters
+
+    private List<GameObject> deadBotters = new List<GameObject>();
     public List<GameObject> DeadBotters { get { return deadBotters; } }
+
+    //Balance
+    private int balance = 500;
+    public int Balance
+    {
+        get { return balance; }
+        //set { Balance = value; }
+    } 
+
+    public void AddMoney(int value)
+    {
+        balance += value;
+    }
+
+    public void ReduceMoney(int value)
+    {
+        balance -= value;
+    }
 
 
     public static GameEnvironment Singleton 
