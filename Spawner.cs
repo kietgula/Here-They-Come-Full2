@@ -12,7 +12,6 @@ public class Spawner : MonoBehaviour
     float nextSpawnTime;
     public float spawnDelay;
 
-    public int spawnCount;
 
     void Start()
     {
@@ -21,14 +20,13 @@ public class Spawner : MonoBehaviour
 
     void Update()
     {
-        if (nextSpawnTime < Time.time && spawnCount>0)
+        if (nextSpawnTime < Time.time)
         {
             var CrabPosition = new Vector3(Random.Range(leftCorner, rightCorner), topCorner, 0);
             GameObject crab = Instantiate(CrabPrefab, CrabPosition, this.transform.rotation);
             GameEnvironment.Singleton.AddTopper(crab);
             
             nextSpawnTime = Time.time + spawnDelay;
-            spawnCount--;
         }
     }
 

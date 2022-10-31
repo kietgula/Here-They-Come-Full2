@@ -15,7 +15,7 @@ public class Actor : MonoBehaviour
 
     //basic stats
     public double maxHP = 100;
-    [SerializeField] protected double HP;
+    [NonSerialized] public double HP;
     public float moveSpeed = 1;
 
     //attack stats
@@ -76,19 +76,21 @@ public class Actor : MonoBehaviour
         else return null;
     }
 
+    //protected void call_for_help()
+
     //attack target aka call target's TakeDamage() function
     protected virtual void attack(GameObject target) //attack target
     {
 
         if (next_attack_time <= Time.time)
         {
-            target.GetComponent<Actor>().TakeDamage(this.attackDamage, this.attackType, this.gameObject);
+            target.GetComponent<Actor>().TakeDamage(this.attackDamage, this.attackType);
             next_attack_time = Time.time + 1 / this.attackSpeed;
         }
     }
 
     //this actor take damage, the damage will increase or decrease depend on attack type and armor type
-    public void TakeDamage(double damage, string type, GameObject attacker)
+    public void TakeDamage(double damage, string type)
     {
         if (this.armorType == "steel" && type == "physical")
             damage = damage * 0.75;
@@ -130,6 +132,9 @@ public class Actor : MonoBehaviour
     //just move to the target, nothing more
     protected void move_to(GameObject target)
     {
+        if (target == null)
+            return;
+
         float target_x = target.transform.position.x;
         float target_y = target.transform.position.y;
         float this_x = this.transform.position.x;

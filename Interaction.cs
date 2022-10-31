@@ -1,13 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Interaction : MonoBehaviour
 {
-    private Camera camera;
+    private new Camera camera;
 
-    public GameObject balanceText;
+    public GameObject BalanceText;
+    public GameObject HeartLfeText;
+    public GameObject TheHeart;
 
     public GameObject Botter1 = null;
     public GameObject Botter2 = null;
@@ -63,7 +67,7 @@ public class Interaction : MonoBehaviour
         {
             Vector3 initPos = camera.ScreenToWorldPoint(Input.mousePosition);
 
-            if (Input.GetMouseButtonUp(0) && initPos.x<2.5 && initPos.x>-2.5 && initPos.y<0.5 && initPos.y>-4)
+            if (Input.GetMouseButtonUp(0) && initPos.x<3 && initPos.x>-3 && initPos.y<3.5 && initPos.y>-4)
             {
                 if (GameEnvironment.Singleton.Balance >= current_botter_value )
                 {
@@ -78,6 +82,10 @@ public class Interaction : MonoBehaviour
             }
         }
 
-        balanceText.GetComponent<TextMeshProUGUI>().text = GameEnvironment.Singleton.Balance.ToString();
+        BalanceText.GetComponent<TextMeshProUGUI>().text = GameEnvironment.Singleton.Balance.ToString();
+
+        HeartLfeText.GetComponent<TextMeshProUGUI>().text = TheHeart.GetComponent<TheHeart>().life.ToString();
     }
+
+
 }

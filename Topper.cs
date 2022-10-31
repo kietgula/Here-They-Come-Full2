@@ -4,16 +4,27 @@ using UnityEngine;
 
 public class Topper : Actor
 {
+    public GameObject TheHeart = null;
 
     [SerializeField] int value = 10;
+
+
+    new void Start()
+    {
+        base.Start();
+
+        TheHeart = GameObject.FindGameObjectWithTag("TheHeart");
+    }
+
+
     //this Update() work like actor intelliger
     protected virtual void Update() //virtual because i want to override it sometime to make some specific botter/topper
     {
         GameObject target = find_target_in_range("Botter");
 
         if (target == null)     //no target in view range
-        { 
-            to_the_South();     //move down, to the Light, to the South :33
+        {
+            move_to(TheHeart);
             play_animation(State.Idle);
         }
         else

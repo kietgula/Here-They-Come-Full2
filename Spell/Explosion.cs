@@ -10,9 +10,9 @@ public class Explosion : Spell
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag != SpellOwner.tag && collision.tag!="Walls")
+        if (collision.tag=="Topper")
         {     
-            collision.gameObject.GetComponent<Actor>().TakeDamage(SpellDamage, "magical", SpellOwner);
+            collision.gameObject.GetComponent<Actor>().TakeDamage(SpellDamage, "magical");
             Destroy(this.gameObject,ExistTime);
         }
     }
